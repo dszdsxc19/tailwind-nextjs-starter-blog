@@ -10,6 +10,7 @@ import type { Authors, Blog } from 'contentlayer/generated'
 import PostSimple from '@/layouts/PostSimple'
 import PostLayout from '@/layouts/PostLayout'
 import PostBanner from '@/layouts/PostBanner'
+import PostWithToc from '@/layouts/PostWithToc'
 import { Metadata } from 'next'
 import siteMetadata from '@/data/siteMetadata'
 import { notFound } from 'next/navigation'
@@ -105,6 +106,27 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   })
 
   const Layout = layouts[post.layout || defaultLayout]
+
+  if (post.toc_of_current_folder) {
+    const postPath = post.path
+    const parts = postPath.split('/')
+    parts.pop()
+    const folderPath = parts.join('/')
+    const posts = allCoreContent(
+      sortPosts(allBlogs.filter((p) => p.path.startsWith(folderPath) && p.path !== postPath))
+    )
+    return (
+      <PostWithToc
+        content={mainContent}
+        authorDetails={authorDetails}
+        next={next}
+        prev={prev}
+        posts={posts}
+      >
+        <MDXLayoutRenderer code={post.body.code} components={components} toc={post.toc} />
+      </PostWithToc>
+    )
+  }
 
   return (
     <>
