@@ -1,0 +1,68 @@
+---
+title: 'Brewfile 驾驶全新 Mac 的现代化清单'
+date: 2025-09-27
+authors: ['default']
+summary: "每次换新 Mac 都是个痛苦的过程。别再手动下载安装一堆工具了，把它们写进 Brewfile，执行一次命令就能把机器拉到可用状态。"
+draft: false
+tags: ['macOS', 'Brewfile', '自动化']
+---
+
+## 开局：一条命令拉起基线
+
+全新 Mac 如果还靠逐个下载安装，那就太像上个十年的流程。把 `Brewfile` 放进版本库，执行一次 `brew bundle --file=Brewfile`，该装的东西全部落地，该跳过的也不会强行写进系统。常规浏览器、Office 套件这类大众软件这里不浪费笔墨，真正省时间的是定制化的那一批。
+
+## 终端基座：更快、更顺手
+
+- **warp**：Rust 写的终端，GPU 渲染、分屏、命令面板都是默认能力，比传统终端更符合现代开发节奏。
+- **zsh-autosuggestions / zsh-syntax-highlighting / zsh-vi-mode**：组合拳解决补全、语法高亮和 VI 操作，装完直接在 shell 里享受肌肉记忆。
+- **neovim**：把 NeoVim 放在基线里，不是为了情怀，是因为一台干净机器仍然需要一把脚本利器。
+- **gh**：GitHub CLI 避免频繁切浏览器，开新仓库、review PR 在终端完成。
+- **tree**：看项目结构不用再找第三方插件，快速浏览目录树是最简单的 sanity check。
+
+## 语言与构建工具链
+
+- **uv**：Python 依赖装配组的主力，解析速度快得不像话，配合 `pipx`、`poetry` 明确区分工具与项目依赖。
+- **pipx**：CLI 工具隔离安装，防止一台机器上全局 Python 环境污染。
+- **poetry**：项目级依赖管理，锁定版本、导出 requirements，一次到位。
+- **nvm**：Node 版本切换不再靠手抄，`brew bundle` 后执行 `nvm use` 就能恢复工作环境。
+- **openjdk@17**、**gradle**、**maven**：Java 生态的现实是多工具并存，把主流编译链一次准备齐全，才能避免在客户项目里临时找镜像。
+- **rust**：系统级工具、CLI 新项目越来越多用 Rust，装好编译器意味着你能随时动手。
+- **cmake**：跨语言依赖的中枢，很多上游项目还是靠它。
+
+## GUI 工具：效率优先
+
+- **raycast**：取代 Spotlight 的指挥塔，剪贴板历史、脚本命令、API 调用都能挂在这里。
+- **cursor** 和 **cherry-studio**：前者是 AI 助手融合到 IDE，后者是多模型客户端。都放在基线里，是为了保证机器随时具备现代代码协作能力。
+- **warp** 已经提过，但它和 **raycast** 组合时效率更明显：命令行和启动器之间无缝切换。
+- **hiddenbar**、**boring-notch**：菜单栏的整理和刘海控制，本质是打造一个干净的状态区，别让通知常驻影响注意力。
+- **linearmouse**、**mos**：触控板时代无可厚非，但外接鼠标需要更细颗粒的滚动和加速度控制。
+- **shottr**：截图、测量、标注一气呵成，比老牌工具轻巧锋利。
+- **qlmarkdown**：Quick Look 即时预览 Markdown，查阅文档不再显得笨重。
+- **obsidian**、**xmind**：知识库与思维导图，一个负责沉淀，一个负责发散。
+
+## 网络与调试
+
+- **proxyman**：HTTP/S 抓包调试，比 Charles 更顺手的现代界面，支持 Apple Silicon 优化。
+- **postman**：API 调试老兵，不用解释，Brewfile 帮你把配置固定在团队共识里。
+- **datagrip**：数据库 IDE，支撑多种后端。如果只想靠 Docker 内的客户端，就算了，真正需要排错时还是得有桌面工具。
+- **docker**：容器化环境的基石，没有它你就别谈 reproducible build。
+- **flutter**：需要快速验证跨平台 UI，装在基线里减少“我得先下载 Flutter”这种废话。
+- **omnissa-horizon-client**：企业虚拟桌面需求越来越常见，把客户端预装好，比到现场再找镜像靠谱。
+
+## 观察与维护
+
+- **stats**：菜单栏的系统监控，温度、网络、内存一目了然，排查性能问题第一时间打开的就是它。
+- **macs-fan-control**：Mac 很安静，但热管不是万能的。这个工具让你在长时间编译时主动调速。
+- **geekbench**：跑分不是炫耀，是装完一堆驱动后确认性能没有异常波动。
+- **silicon**：识别 Intel-only 应用，避免你把 Rosetta 依赖带进生产。
+- **neofetch**：轻量级系统汇总，提交 issue 时附上输出，省去对方询问操作系统细节的时间。
+
+## 内容与创意
+
+- **obs**：直播或录屏演示，默认装好才能随时拉起调试或 demo。
+- **videofusion**：简单的视频剪辑任务不用再下载笨重的全家桶。
+- **paper**：高分辨率壁纸应用，让共享屏幕时默认环境看起来专业。
+
+## 收尾
+
+Brewfile 不是炫技，而是告诉团队“这台机器现在就能干活”。上面列的条目覆盖了开发、协作、调试到演示的完整链路，缺的和过时的都已经被剔除。装完之后跑一遍 `brew bundle cleanup`，确认系统里只留我们信任的工具，然后开始写代码。
