@@ -1,0 +1,120 @@
+---
+title: 'Brewfile 驾驶全新 Mac 的现代化清单'
+date: 2025-09-27
+authors: ['default']
+summary: "刚拿到新 Mac 的程序员快速上手指南，从系统初始化、Homebrew 安装到 Brewfile 一about:blank#blocked键恢复，配合中国开发者常用的网络优化。"
+draft: false
+tags: ['macOS', 'Brewfile', '自动化']
+---
+
+## 拿到新 Mac 的第一小时
+
+把新机器从包装里取出来后的第一件事，是确认系统和账户状态。建议直接升级到 **macOS Tahoe**（15.x 及更高），Apple 的新版本对 Apple Silicon 的调度更稳定，也修复了不少老问题。依次打开 `系统设置 -> 通用 -> 软件更新` 检查补丁，必要时执行：
+
+```bash
+sudo softwareupdate --install -a
+```
+
+同步 Apple ID、语言、输入法后，先把常用的隐私权限（屏幕录制、文件访问）打开，避免后期频繁弹窗。再对“节能”和“触控板”做轻微调整，让这台机器先符合你的使用习惯。
+
+## 安装命令行编译环境
+
+Homebrew 依赖 Xcode Command Line Tools，没有它很多 Formula 会失败。运行：
+
+```bash
+xcode-select --install
+```
+
+安装完成后用 `xcode-select -p` 和 `xcodebuild -version` 确认路径与版本。macOS 默认 shell 已经是 `zsh`，但一台新机器通常还没有配置文件。提前创建 `~/.zshrc` 并写上基础 alias、代理变量和 PATH 习惯，后面同步 dotfiles 会更顺滑：
+
+```bash
+touch ~/.zshrc
+```
+
+如果你习惯把 dotfiles 放在 Git 仓库，此时就可以 clone 下来并执行安装脚本，保持老机器与新机器的环境一致。
+
+## Homebrew 与网络环境优化
+
+准备好命令行工具后即可安装 Homebrew：
+
+```bash
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+安装完把 `/opt/homebrew/bin` 加入 `PATH`，同时运行 `brew doctor` 确认没有明显问题。对于中国大陆的网络环境，建议立即配置镜像或 HTTP 代理，避免每次下载都卡在网络上：
+
+```bash
+export HOMEBREW_BREW_GIT_REMOTE="https://mirrors.tuna.tsinghua.edu.cn/git/homebrew/brew.git"
+export HOMEBREW_CORE_GIT_REMOTE="https://mirrors.tuna.tsinghua.edu.cn/git/homebrew/homebrew-core.git"
+export HOMEBREW_BOTTLE_DOMAIN="https://mirrors.tencent.com/homebrew-bottles"
+# 或根据团队规范指向自建代理服务器
+```
+
+把这些变量写进 `~/.zshrc`，`brew update` 之后就会生效。公司如果有统一的代理服务器，记得用 `export http_proxy`、`https_proxy` 接入，并在 `.curlrc` 与 `.gitconfig` 中同步配置。
+
+## Brewfile：一次性拉起工作基线
+
+准备好网络环境后，就可以用 Brewfile 自动装齐工具。把团队维护的 Brewfile 放进代码仓库，或者在 dotfiles 中单独存放：
+
+```bash
+git clone git@github.com:your-team/dotfiles.git ~/dotfiles
+brew bundle --file ~/dotfiles/Brewfile
+```
+
+新机器首次执行最好加上 `--verbose`，方便观察是否有依赖冲突。完成后再运行 `brew bundle cleanup --file ~/dotfiles/Brewfile`，把不在清单中的旧 Formula 清理掉，保持系统干净。
+
+## 终端基座：更快、更顺手
+
+- **warp**：Rust 编写的现代终端，GPU 渲染、命令搜索、命令面板统统内建，拆箱就拥有分屏和 AI 辅助。
+- **zsh-autosuggestions / zsh-syntax-highlighting / zsh-vi-mode**：补全、语法高亮和 VI 操作的组合拳，让默认 shell 直接具备 IDE 级别的反馈。
+- **neovim**：即使主力在 GUI 编辑器，Neovim 仍是处理日志、快速脚本的最佳捷径，Brewfile 里记得带上配置链接。
+- **gh**：GitHub CLI 让你在终端里开仓库、处理 PR、触发 Workflow，无需频繁切浏览器。
+- **tree**：快速扫一眼项目结构，排查脚本或构建产物位置时非常高效。
+
+## 语言与构建工具链
+
+- **uv**：次世代 Python 包管理器，解析与安装速度比 pip 快几倍，适合和 `pipx`、`poetry` 搭配做环境隔离。
+- **pipx**：把 CLI 工具隔离在独立虚拟环境，避免系统 Python 因全局安装而变脏。
+- **poetry**：项目级依赖与版本锁定的利器，团队协作时能保证一致的 lockfile。
+- **nvm**：Node 版本管理必备，执行 `nvm use` 就能回到项目要求的版本。
+- **openjdk@17**、**gradle**、**maven**：Java 项目很少只依赖一种工具链，一次准备齐全能避免临时下载。
+- **rust**：越来越多 CLI 和后端服务靠 Rust，安装编译链意味着你随时可以 `cargo build`。
+- **cmake**：跨语言依赖的枢纽，也是许多开源项目的默认构建系统。
+
+## GUI 工具：效率优先
+
+- **raycast**：取代 Spotlight 的指挥中心，剪贴板历史、脚本和 API 请求都能挂上去，是键盘党最爱的入口。
+- **cursor** 与 **cherry-studio**：前者在 IDE 中嵌入 AI 对话，后者提供多模型调度，两者结合保证代码协作和知识检索都不卡壳。
+- **warp** 与 **raycast** 配合使用时，命令行和启动器切换几乎无缝，熟练后能显著提升完成任务的速度。
+- **hiddenbar**、**boring-notch**：整理菜单栏和刘海区域，演示或录屏时界面更清爽。
+- **linearmouse**、**mos**：细分鼠标加速度和滚动速度，满足不同外设的使用习惯。
+- **shottr**：截图、测量、马赛克一次完成，适合产品演示与技术支持。
+- **qlmarkdown**：让 Quick Look 即时预览 Markdown，查阅 README 或笔记不必另开编辑器。
+- **obsidian**、**xmind**：一个负责知识沉淀，一个负责思维发散，形成完整的笔记系统。
+
+## 网络与调试
+
+- **proxyman**：Apple Silicon 适配完善的 HTTP/S 抓包工具，对国内常见应用的信任证书导入也很友好。
+- **postman**：经典的 API 调试工具，Brewfile 统一版本后，团队共享的集合和环境变量会更可靠。
+- **datagrip**：专业数据库 IDE，面对复杂的跨库联调时比命令行效率更高。
+- **docker**：容器化环境的基石，配合 Brewfile 装好后一条命令即可恢复镜像和 compose 配置。
+- **flutter**：需要快速验证跨平台 UI 时，提前装好 SDK 能节省沟通成本。
+- **omnissa-horizon-client**：国内外不少企业都用的虚拟桌面客户端，提前准备好避免现场排队下载。
+
+## 观察与维护
+
+- **stats**：菜单栏系统监控，CPU、网络、温度、磁盘一眼掌握，排查性能问题时第一时间打开。
+- **macs-fan-control**：让你在长时间编译或视频剪辑时手动管理风扇曲线，防止频繁降频。
+- **geekbench**：不是为了炫耀成绩，而是确认装完驱动和补丁后性能没有异常波动。
+- **silicon**：识别出仍然依赖 Intel 架构的应用，提醒自己是否需要提前装 Rosetta。
+- **neofetch**：轻量级系统信息查看，提交 issue 或向同事求助时附上输出最省事。
+
+## 内容与创意
+
+- **obs**：直播、录屏、演示的基础设施，调试环境或 Demo 随时能开播。
+- **videofusion**：处理简单视频剪辑任务的轻量工具，短时间内快速出片。
+- **paper**：提供高质量壁纸与主题，让共享屏幕时默认桌面也显得专业。
+
+## 收尾
+
+Brewfile 的意义在于让团队共识落地：这台机器装好之后就能进入工作状态。执行完 `brew bundle` 后再跑一遍 `brew doctor` 与 `brew bundle cleanup`，确认系统里只留下需要的工具。把调好的 Brewfile 和 dotfiles 推送回仓库，下次换机器或帮助同事装机时就能“一键复现”，也为未来的自动化脚本打下基础。
